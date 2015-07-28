@@ -3,7 +3,7 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-
+var bcrypt = require('bcrypt-nodejs');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -96,12 +96,17 @@ app.get('/login', function(req, res) {
 
 app.post('/login', function(req, res) {
   db.knex('users').where({
-    username: req.body.username,
-    password: req.body.password
-  }).select('username').then(function(results){
+    username: req.body.username
+  }).select().then(function(results){
     if (results.length) {
-      req.session.user = results[0].username;
-      res.redirect('/');
+      bcrypt.compare(req.body.password, results[0].passwordHash, function(err, result) {
+        if (result) {
+          req.session.user = results[0].username;
+          res.redirect('/');
+        } else {
+          res.redirect('/login');
+        }
+      });
     } else {
       res.redirect('/login');
     }
@@ -113,9 +118,14 @@ app.get('/signup', function(req, res) {
 });
 
 app.post('/signup', function(req, res) {
-  db.knex('users').insert(req.body).then(function() {
-    req.session.user = req.body.username;
-    res.redirect('/');
+  bcrypt.hash(req.body.password, null, null, function(err, hash){
+    db.knex('users').insert({
+      username: req.body.username,
+      passwordHash: hash
+    }).then(function() {
+      req.session.user = req.body.username;
+      res.redirect('/');
+    });
   });
 });
 
