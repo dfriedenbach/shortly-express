@@ -95,13 +95,12 @@ app.get('/login', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
-  db.knex('users').where({
-    username: req.body.username
-  }).select().then(function(results){
-    if (results.length) {
-      bcrypt.compare(req.body.password, results[0].passwordHash, function(err, result) {
+  new User({username: req.body.username})
+  .fetch().then(function(user){
+    if (user) {
+      bcrypt.compare(req.body.password, user.get('passwordHash'), function(err, result) {
         if (result) {
-          req.session.user = results[0].username;
+          req.session.user = req.body.username;
           res.redirect('/');
         } else {
           res.redirect('/login');
@@ -118,14 +117,21 @@ app.get('/signup', function(req, res) {
 });
 
 app.post('/signup', function(req, res) {
-  bcrypt.hash(req.body.password, null, null, function(err, hash){
-    db.knex('users').insert({
-      username: req.body.username,
-      passwordHash: hash
-    }).then(function() {
-      req.session.user = req.body.username;
-      res.redirect('/');
-    });
+  new User({username: req.body.username})
+  .fetch().then(function(user){
+    if (user) {
+      res.redirect('/login');
+    } else {
+      bcrypt.hash(req.body.password, null, null, function(err, hash){
+        new User({
+          username: req.body.username,
+          passwordHash: hash
+        }).save().then(function() {
+          req.session.user = req.body.username;
+          res.redirect('/');
+        });
+      });
+    }
   });
 });
 

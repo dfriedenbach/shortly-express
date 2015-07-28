@@ -67,10 +67,10 @@ describe('', function() {
     beforeEach(function(done){
       // create a user that we can then log-in with
       bcrypt.hash('Phillip', null, null, function(err, hash){
-        db.knex('users').insert({
-            'username': 'Phillip',
-            'passwordHash': hash
-        }).then(function(){
+        new User({
+          'username': 'Phillip',
+          'passwordHash': hash
+        }).save().then(function(){
           var options = {
             'method': 'POST',
             'followAllRedirects': true,
@@ -295,10 +295,10 @@ describe('', function() {
 
     beforeEach(function(done){
       bcrypt.hash('Phillip', null, null, function(err, hash){
-        db.knex('users').insert({
-            'username': 'Phillip',
-            'passwordHash': hash
-        }).then(function(){
+        new User({
+          'username': 'Phillip',
+          'passwordHash': hash
+        }).save().then(function(){
           done()
         });
       });
