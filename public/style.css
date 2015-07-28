@@ -35,7 +35,7 @@ h1 {
   float: right;
 }
 
-.navigation li a , .logout {
+.navigation li a {
   width: 100px;
   height: 20px;
   line-height: 20px;
