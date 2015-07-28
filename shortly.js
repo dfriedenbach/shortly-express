@@ -46,7 +46,7 @@ function(req, res) {
   res.render('index');
 });
 
-app.get('/links',
+app.get('/links', checkUser,
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
@@ -90,8 +90,33 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
-app.get('/login', function(req, res){
+app.get('/login', function(req, res) {
   res.render('login');
+});
+
+app.post('/login', function(req, res) {
+  db.knex('users').where({
+    username: req.body.username,
+    password: req.body.password
+  }).select('username').then(function(results){
+    if (results.length) {
+      req.session.user = results[0].username;
+      res.redirect('/');
+    } else {
+      res.redirect('/login');
+    }
+  })
+});
+
+app.get('/signup', function(req, res) {
+  res.render('signup');
+});
+
+app.post('/signup', function(req, res) {
+  db.knex('users').insert(req.body).then(function() {
+    req.session.user = req.body.username;
+    res.redirect('/');
+  });
 });
 
 
