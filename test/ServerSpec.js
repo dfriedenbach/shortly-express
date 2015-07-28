@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
 var request = require('request');
+var bcrypt = require('bcrypt-nodejs');
 
 var db = require('../app/config');
 var Users = require('../app/collections/users');
@@ -65,22 +66,24 @@ describe('', function() {
 
     beforeEach(function(done){
       // create a user that we can then log-in with
-      db.knex('users').insert({
-          'username': 'Phillip',
-          'password': 'Phillip'
-      }).then(function(){
-        var options = {
-          'method': 'POST',
-          'followAllRedirects': true,
-          'uri': 'http://127.0.0.1:4568/login',
-          'json': {
+      bcrypt.hash('Phillip', null, null, function(err, hash){
+        db.knex('users').insert({
             'username': 'Phillip',
-            'password': 'Phillip'
-          }
-        };
-        // login via form and save session info
-        requestWithSession(options, function(error, res, body) {
-          done();
+            'passwordHash': hash
+        }).then(function(){
+          var options = {
+            'method': 'POST',
+            'followAllRedirects': true,
+            'uri': 'http://127.0.0.1:4568/login',
+            'json': {
+              'username': 'Phillip',
+              'password': 'Phillip'
+            }
+          };
+          // login via form and save session info
+          requestWithSession(options, function(error, res, body) {
+            done();
+          });
         });
       });
     });
@@ -291,11 +294,13 @@ describe('', function() {
     var requestWithSession = request.defaults({jar: true});
 
     beforeEach(function(done){
-      db.knex('users').insert({
-          'username': 'Phillip',
-          'password': 'Phillip'
-      }).then(function(){
-        done()
+      bcrypt.hash('Phillip', null, null, function(err, hash){
+        db.knex('users').insert({
+            'username': 'Phillip',
+            'passwordHash': hash
+        }).then(function(){
+          done()
+        });
       });
     })
 
