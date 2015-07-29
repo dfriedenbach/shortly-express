@@ -23,7 +23,10 @@
     "forever": "^0.10.11",
     "knex": "~0.5.7",
     "mocha": "^1.17.1",
+    "morgan": "^1.6.1",
     "nodemon": "^1.2.1",
+    "passport": "^0.2.2",
+    "passport-github2": "^0.1.9",
     "request": "^2.34.0",
     "sqlite3": "~3.0.5"
   }
